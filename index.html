@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Đấu Trường KHTN 8 (Lý - Hóa - Sinh) | THCS Ninh Hòa</title>
+  <style>
+    :root { --primary: #0284c7; --primary-dark: #0369a1; --secondary: #f59e0b; --success: #10b981; --danger: #ef4444; --card: #ffffff; --text: #1f2937; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { background: linear-gradient(135deg, #0284c7 0%, #4f46e5 100%); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 10px; color: var(--text); }
+    .app-container { background: var(--card); width: 100%; max-width: 480px; border-radius: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.25); overflow: hidden; display: flex; flex-direction: column; min-height: 88vh; }
+    .header { background: var(--primary); color: white; padding: 14px 16px; text-align: center; }
+    .header h1 { font-size: 1.18rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+    .header p { font-size: 0.8rem; opacity: 0.92; margin-top: 2px; }
+    .screen { display: none; padding: 18px; flex: 1; flex-direction: column; justify-content: space-between; }
+    .screen.active { display: flex; animation: fadeIn 0.25s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .input-row { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; margin: 14px 0; text-align: left; }
+    .input-group label { display: block; font-weight: 600; margin-bottom: 4px; font-size: 0.85rem; color: #4b5563; }
+    .input-group input { width: 100%; padding: 11px; border: 2px solid #e5e7eb; border-radius: 12px; font-size: 0.95rem; outline: none; }
+    .input-group input:focus { border-color: var(--primary); }
+    .subject-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+    .btn-subject { width: 100%; padding: 15px 18px; border: none; border-radius: 16px; font-size: 1.05rem; font-weight: 700; color: white; cursor: pointer; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.1s; }
+    .btn-subject:active { transform: scale(0.98); }
+    .btn-ly { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
+    .btn-hoa { background: linear-gradient(135deg, #ea580c, #c2410c); }
+    .btn-sinh { background: linear-gradient(135deg, #059669, #047857); }
+    .rank-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .btn-rank-view { padding: 9px 6px; background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; border-radius: 10px; font-size: 0.8rem; font-weight: 700; cursor: pointer; }
+    .stats-bar { display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 10px 14px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #e2e8f0; font-weight: 700; font-size: 0.9rem; }
+    .combo-badge { background: #fef3c7; color: #d97706; padding: 3px 8px; border-radius: 20px; font-size: 0.8rem; }
+    .progress-wrap { width: 100%; height: 8px; background: #e5e7eb; border-radius: 99px; overflow: hidden; margin-bottom: 12px; }
+    .progress-fill { height: 100%; background: var(--secondary); width: 0%; transition: width 0.3s ease; }
+    .round-badge { display: inline-block; background: #e0f2fe; color: var(--primary-dark); padding: 4px 10px; border-radius: 99px; font-size: 0.75rem; font-weight: 700; margin-bottom: 8px; }
+    .context-box { background: #fffbeb; border-left: 4px solid var(--secondary); padding: 8px 12px; border-radius: 8px; font-size: 0.82rem; color: #92400e; margin-bottom: 10px; display: none; }
+    .question-text { font-size: 1.05rem; font-weight: 700; line-height: 1.45; margin-bottom: 14px; color: #111827; }
+    .options-list { display: flex; flex-direction: column; gap: 9px; margin-bottom: 14px; }
+    .option-btn { width: 100%; text-align: left; padding: 12px 14px; background: #f9fafb; border: 2px solid #e5e7eb; border-radius: 12px; font-size: 0.94rem; font-weight: 500; color: var(--text); cursor: pointer; line-height: 1.35; }
+    .tf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+    .tf-btn { padding: 18px; font-size: 1.15rem; font-weight: 800; text-align: center; border-radius: 14px; border: 2px solid #e5e7eb; background: #f9fafb; cursor: pointer; }
+    .correct { background: #d1fae5 !important; border-color: var(--success) !important; color: #065f46 !important; font-weight: 700; }
+    .wrong { background: #fee2e2 !important; border-color: var(--danger) !important; color: #991b1b !important; }
+    .feedback-box { padding: 12px; border-radius: 12px; margin-bottom: 14px; font-size: 0.88rem; line-height: 1.4; display: none; }
+    .feedback-box.show { display: block; }
+    .feedback-correct { background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; }
+    .feedback-wrong { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+    .next-btn { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; display: none; margin-top: auto; }
+    .next-btn.show { display: block; }
+    .leaderboard-box { margin-top: 12px; background: #f8fafc; border-radius: 14px; padding: 10px; border: 1px solid #e2e8f0; max-height: 210px; overflow-y: auto; text-align: left; }
+    .lb-title { font-weight: 800; font-size: 0.88rem; color: var(--primary-dark); margin-bottom: 6px; text-align: center; text-transform: uppercase; }
+    .lb-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    .lb-table th { color: #6b7280; font-weight: 600; padding: 5px 4px; border-bottom: 1px solid #e2e8f0; text-align: left; }
+    .lb-table td { padding: 6px 4px; border-bottom: 1px solid #f1f5f9; font-weight: 500; }
+    .btn-restart { width: 100%; padding: 14px; background: var(--secondary); color: white; border: none; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; margin-top: 12px; }
+    .status-pill { display: inline-block; font-size: 0.78rem; padding: 4px 10px; border-radius: 20px; background: #e0f2fe; color: #0369a1; margin-top: 6px; font-weight: 600; }
+  </style>
+</head>
+<body>
+<div class="app-container">
+  <div class="header">
+    <h1>Đấu Trường KHTN 8</h1>
+    <p>Trường THCS Ninh Hòa • Ôn tập Giữa HKI</p>
+  </div>
+
+  <!-- MÀN HÌNH CHÍNH -->
+  <div id="homeScreen" class="screen active">
+    <div style="text-align: center; margin: auto 0;">
+      <div style="font-size: 2.8rem;">🔬</div>
+      <h2 style="font-size: 1.22rem;">Chọn Phân Môn Thi Đấu</h2>
+      <div id="loadStatus" class="status-pill">⏳ Đang kết nối ngân hàng đề KHTN 8...</div>
+
+      <div class="input-row">
+        <div class="input-group">
+          <label>Họ và tên học sinh:</label>
+          <input type="text" id="playerName" placeholder="Nguyễn Văn A">
+        </div>
+        <div class="input-group">
+          <label>Lớp:</label>
+          <input type="text" id="playerClass" placeholder="8/1">
+        </div>
+      </div>
+
+      <div class="subject-list">
+        <button class="btn-subject btn-ly" onclick="startGame('LY', 'VẬT LÝ 8')">
+          <span>⚡ PHÂN MÔN VẬT LÝ 8</span>
+          <span>Vào thi ➔</span>
+        </button>
+        <button class="btn-subject btn-hoa" onclick="startGame('HOA', 'HÓA HỌC 8')">
+          <span>🧪 PHÂN MÔN HÓA HỌC 8</span>
+          <span>Vào thi ➔</span>
+        </button>
+        <button class="btn-subject btn-sinh" onclick="startGame('SINH', 'SINH HỌC 8')">
+          <span>🧬 PHÂN MÔN SINH HỌC 8</span>
+          <span>Vào thi ➔</span>
+        </button>
+      </div>
+
+      <div class="rank-grid">
+        <button class="btn-rank-view" onclick="viewTop('LY', 'VẬT LÝ 8')">🏆 Top Lý</button>
+        <button class="btn-rank-view" onclick="viewTop('HOA', 'HÓA HỌC 8')">🏆 Top Hóa</button>
+        <button class="btn-rank-view" onclick="viewTop('SINH', 'SINH HỌC 8')">🏆 Top Sinh</button>
+      </div>
+
+      <div id="homeLeaderboard" class="leaderboard-box" style="display:none;"></div>
+    </div>
+    <p style="text-align: center; font-size: 0.75rem; color: #9ca3af; margin-top: 8px;">Tổ KHTN & Công nghệ - THCS Ninh Hòa</p>
+  </div>
+
+  <!-- MÀN HÌNH CHƠI GAME -->
+  <div id="gameScreen" class="screen">
+    <div>
+      <div class="stats-bar">
+        <div>🏆 Điểm: <span id="scoreVal">0</span></div>
+        <div><span class="combo-badge" id="comboVal">🔥 Combo x0</span></div>
+        <div>📋 <span id="qCountVal">1/20</span></div>
+      </div>
+      <div class="progress-wrap"><div class="progress-fill" id="progressBar"></div></div>
+      <div class="round-badge" id="roundBadge">VÒNG 1</div>
+      <div class="context-box" id="contextBox"></div>
+      <div class="question-text" id="questionText">Đang tải câu hỏi...</div>
+      <div id="optionsContainer" class="options-list"></div>
+      <div id="feedbackBox" class="feedback-box"></div>
+    </div>
+    <button id="nextBtn" class="next-btn" onclick="nextQuestion()">Câu tiếp theo ➔</button>
+  </div>
+
+  <!-- MÀN HÌNH KẾT QUẢ -->
+  <div id="resultScreen" class="screen">
+    <div style="text-align: center; margin: auto 0;">
+      <h2 style="font-size: 1.25rem;">🎉 Hoàn thành xuất sắc!</h2>
+      <p id="playerSummary" style="color: #6b7280; font-size: 0.88rem; margin-top: 2px;"></p>
+      <div style="background: linear-gradient(135deg, #0284c7, #4f46e5); color: white; padding: 12px; border-radius: 16px; margin: 10px 0; display: flex; justify-content: space-around; align-items: center;">
+        <div>
+          <div style="font-size: 2rem; font-weight: 800;" id="finalScore">0</div>
+          <div style="font-size: 0.72rem; opacity: 0.9;">TỔNG ĐIỂM</div>
+        </div>
+        <div style="text-align: left; font-size: 0.84rem; line-height: 1.5;">
+          <div>✅ Đúng: <strong id="correctTotal">0</strong></div>
+          <div>🔥 Max Combo: <strong id="maxComboTotal">0</strong></div>
+          <div>🎖️ <strong id="rankTitle">Nhà Khoa Học Trẻ</strong></div>
+        </div>
+      </div>
+      <div id="saveStatus" style="font-size: 0.82rem; color: #059669; font-weight: 600; margin-bottom: 4px;">⏳ Đang lưu điểm...</div>
+      <div class="leaderboard-box">
+        <div class="lb-title" id="resultLbTitle">🏆 BẢNG VÀNG TOP 10</div>
+        <div id="lbContent" style="text-align: center; color: #6b7280; font-size: 0.82rem;">Đang tải...</div>
+      </div>
+      <button class="btn-restart" onclick="goHome()">🔄 Chọn phân môn khác / Chơi lại</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // =========================================================================
+  // ANH THỌ DÁN LINK WEB APP (/exec) CỦA KHTN 8 VÀO DÒNG DƯỚI ĐÂY:
+  // =========================================================================
+  const SCRIPT_URL = "DÁN_LINK_EXEC_KHTN8_VÀO_ĐÂY";
+
+  let ALL_DATA = {};
+  let questions = [], currentIndex = 0, score = 0, combo = 0, maxCombo = 0, correctCount = 0;
+  let currentSubKey = "LY", currentSubName = "VẬT LÝ 8";
+  let studentName = "", studentClass = "";
+
+  window.onload = async function() {
+    const statusEl = document.getElementById('loadStatus');
+    try {
+      const res = await fetch(`${SCRIPT_URL}?action=getQuestions`);
+      ALL_DATA = await res.json();
+      statusEl.innerText = "✅ Đã sẵn sàng (Vật Lý 8 • Hóa Học 8 • Sinh Học 8)";
+      statusEl.style.background = "#d1fae5";
+      statusEl.style.color = "#065f46";
+    } catch (err) {
+      statusEl.innerText = "⚠️ Vui lòng kiểm tra kết nối mạng hoặc SCRIPT_URL";
+      statusEl.style.background = "#fee2e2";
+      statusEl.style.color = "#991b1b";
+    }
+  };
+
+  function shuffle(arr) {
+    let a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function startGame(subKey, subName) {
+    studentName = document.getElementById('playerName').value.trim();
+    studentClass = document.getElementById('playerClass').value.trim();
+    if (!studentName || !studentClass) {
+      alert("Các em vui lòng nhập đầy đủ Họ tên và Lớp trước khi vào thi nhé!");
+      return;
+    }
+    if (!ALL_DATA[subKey]) {
+      alert("Đang tải dữ liệu câu hỏi từ máy chủ, vui lòng chờ 2 giây rồi bấm lại nhé!");
+      return;
+    }
+
+    currentSubKey = subKey;
+    currentSubName = subName;
+    const raw = ALL_DATA[subKey];
+
+    const mcList = shuffle(raw.mc).map(item => ({
+      type: 'mc', q: item[0], correctAns: item[1][0], options: shuffle(item[1])
+    }));
+    const tfList = shuffle(raw.tf).map(item => ({
+      type: 'tf', ctx: item[0], q: item[1], correctAns: item[2], exp: item[3] || "Chính xác!"
+    }));
+
+    questions = [...mcList, ...tfList];
+    currentIndex = 0; score = 0; combo = 0; maxCombo = 0; correctCount = 0;
+
+    document.getElementById('homeScreen').classList.remove('active');
+    document.getElementById('resultScreen').classList.remove('active');
+    document.getElementById('gameScreen').classList.add('active');
+    renderQuestion();
+  }
+
+  function renderQuestion() {
+    const qObj = questions[currentIndex];
+    document.getElementById('scoreVal').innerText = score;
+    document.getElementById('comboVal').innerText = `🔥 Combo x${combo}`;
+    document.getElementById('qCountVal').innerText = `${currentIndex + 1}/${questions.length}`;
+    document.getElementById('progressBar').style.width = `${((currentIndex + 1) / questions.length) * 100}%`;
+
+    const roundBadge = document.getElementById('roundBadge');
+    const contextBox = document.getElementById('contextBox');
+    const container = document.getElementById('optionsContainer');
+    document.getElementById('feedbackBox').className = 'feedback-box';
+    document.getElementById('nextBtn').className = 'next-btn';
+    container.innerHTML = '';
+    document.getElementById('questionText').innerText = qObj.q;
+
+    if (qObj.type === 'mc') {
+      roundBadge.innerText = `${currentSubName} • VÒNG 1: TRẮC NGHIỆM`;
+      contextBox.style.display = 'none';
+      container.className = 'options-list';
+      qObj.options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.innerText = opt;
+        btn.onclick = () => checkMC(btn, opt, qObj.correctAns);
+        container.appendChild(btn);
+      });
+    } else {
+      roundBadge.innerText = `${currentSubName} • VÒNG 2: ĐÚNG HAY SAI?`;
+      contextBox.style.display = 'block';
+      contextBox.innerText = `📌 Chủ đề: ${qObj.ctx}`;
+      container.className = 'tf-grid';
+      const btnT = document.createElement('button');
+      btnT.className = 'tf-btn'; btnT.innerText = '👍 ĐÚNG';
+      btnT.onclick = () => checkTF(btnT, true, qObj.correctAns, qObj.exp);
+      const btnF = document.createElement('button');
+      btnF.className = 'tf-btn'; btnF.innerText = '👎 SAI';
+      btnF.onclick = () => checkTF(btnF, false, qObj.correctAns, qObj.exp);
+      container.appendChild(btnT); container.appendChild(btnF);
+    }
+  }
+
+  function checkMC(btn, chosen, correct) {
+    document.querySelectorAll('.option-btn').forEach(b => {
+      b.disabled = true;
+      if (b.innerText === correct) b.classList.add('correct');
+    });
+    const fb = document.getElementById('feedbackBox');
+    if (chosen === correct) {
+      btn.classList.add('correct'); combo++; if (combo > maxCombo) maxCombo = combo; correctCount++;
+      let bonus = combo >= 3 ? 20 : 10; score += bonus;
+      fb.innerHTML = `✅ <strong>Chính xác!</strong> (+${bonus} điểm)`;
+      fb.className = 'feedback-box feedback-correct show';
+    } else {
+      btn.classList.add('wrong'); combo = 0;
+      fb.innerHTML = `❌ <strong>Chưa đúng!</strong> Hãy ghi nhớ đáp án màu xanh nhé.`;
+      fb.className = 'feedback-box feedback-wrong show';
+    }
+    document.getElementById('scoreVal').innerText = score;
+    document.getElementById('comboVal').innerText = `🔥 Combo x${combo}`;
+    document.getElementById('nextBtn').classList.add('show');
+  }
+
+  function checkTF(btn, chosen, correct, exp) {
+    const btns = document.querySelectorAll('.tf-btn');
+    btns.forEach(b => b.disabled = true);
+    const fb = document.getElementById('feedbackBox');
+    if (chosen === correct) {
+      btn.classList.add('correct'); combo++; if (combo > maxCombo) maxCombo = combo; correctCount++;
+      let bonus = combo >= 3 ? 20 : 10; score += bonus;
+      fb.innerHTML = `✅ <strong>Tuyệt vời!</strong> (+${bonus} điểm)`;
+      fb.className = 'feedback-box feedback-correct show';
+    } else {
+      btn.classList.add('wrong'); btns[correct ? 0 : 1].classList.add('correct'); combo = 0;
+      fb.innerHTML = `❌ <strong>Sai mất rồi!</strong><br>💡 ${exp}`;
+      fb.className = 'feedback-box feedback-wrong show';
+    }
+    document.getElementById('scoreVal').innerText = score;
+    document.getElementById('comboVal').innerText = `🔥 Combo x${combo}`;
+    document.getElementById('nextBtn').classList.add('show');
+  }
+
+  function nextQuestion() {
+    currentIndex++;
+    if (currentIndex < questions.length) renderQuestion();
+    else showResults();
+  }
+
+  async function showResults() {
+    document.getElementById('gameScreen').classList.remove('active');
+    document.getElementById('resultScreen').classList.add('active');
+    document.getElementById('playerSummary').innerText = `${studentName} - Lớp ${studentClass} • ${currentSubName}`;
+    document.getElementById('finalScore').innerText = score;
+    document.getElementById('correctTotal').innerText = `${correctCount}/${questions.length}`;
+    document.getElementById('maxComboTotal').innerText = maxCombo;
+    document.getElementById('resultLbTitle').innerText = `🏆 TOP 10 ${currentSubName}`;
+
+    let r = correctCount / questions.length;
+    let rank = r >= 0.9 ? "Nhà Bác Học Lỗi Lạc 👑" : r >= 0.75 ? "Chuyên Gia Khoa Học 🚀" : r >= 0.5 ? "Nhà Nghiên Cứu Trẻ ⚡" : "Tập Sự Khoa Học 🌱";
+    document.getElementById('rankTitle').innerText = rank;
+    document.getElementById('saveStatus').innerText = "⏳ Đang lưu điểm lên Bảng vàng...";
+
+    try {
+      const params = new URLSearchParams({
+        action: "saveScore",
+        subject: currentSubKey,
+        name: studentName,
+        className: studentClass,
+        score: score,
+        correct: correctCount,
+        total: questions.length,
+        maxCombo: maxCombo,
+        rank: rank
+      });
+      const res = await fetch(`${SCRIPT_URL}?${params.toString()}`);
+      const topList = await res.json();
+      document.getElementById('saveStatus').innerText = "✅ Đã ghi nhận điểm vào hệ thống của Thầy!";
+      renderLeaderboardTable(topList, 'lbContent');
+    } catch (e) {
+      document.getElementById('saveStatus').innerText = "⚠️ Không thể lưu điểm do lỗi mạng.";
+    }
+  }
+
+  function renderLeaderboardTable(list, targetId) {
+    const el = document.getElementById(targetId);
+    if (!list || list.length === 0) { el.innerHTML = "<p style='padding:8px;text-align:center;'>Chưa có lượt ghi điểm nào.</p>"; return; }
+    let h = `<table class="lb-table"><thead><tr><th>#</th><th>Họ tên</th><th>Lớp</th><th>Điểm</th><th>Đúng</th></tr></thead><tbody>`;
+    list.forEach((it, i) => {
+      let m = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : (i + 1);
+      h += `<tr><td><b>${m}</b></td><td>${it.name}</td><td>${it.className}</td><td style="color:#0284c7;font-weight:700;">${it.score}</td><td>${it.correct}</td></tr>`;
+    });
+    el.innerHTML = h + `</tbody></table>`;
+  }
+
+  async function viewTop(subKey, subName) {
+    const box = document.getElementById('homeLeaderboard');
+    box.style.display = 'block';
+    box.innerHTML = `<div class="lb-title">🏆 TOP 10 ${subName}</div><div id="homeLbContent" style="text-align:center;font-size:0.82rem;">⏳ Đang tải...</div>`;
+    try {
+      const res = await fetch(`${SCRIPT_URL}?action=getLeaderboard&subject=${subKey}`);
+      const list = await res.json();
+      renderLeaderboardTable(list, 'homeLbContent');
+    } catch (e) {
+      document.getElementById('homeLbContent').innerText = "⚠️ Lỗi tải bảng xếp hạng.";
+    }
+  }
+
+  function goHome() {
+    document.getElementById('resultScreen').classList.remove('active');
+    document.getElementById('homeScreen').classList.add('active');
+  }
+</script>
+</body>
+</html>
